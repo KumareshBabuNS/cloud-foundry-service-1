@@ -79,6 +79,7 @@ The Cloud Foundry Service is a Polymer based service to interact with the Cloud 
       },
 
       _sendRequest: function (options) {
+        var _this = this;
         // Generate deferred promise
         var deferred = Q.defer();
 
@@ -94,9 +95,9 @@ The Cloud Foundry Service is a Polymer based service to interact with the Cloud 
         // Handle state change and response
         xmlhttp.onreadystatechange = function() {
           if (this.readyState == 4 && this.status.toString().indexOf(2) === 0) {
-            deferred.resolve(this._parseResponse(this.response));
+            deferred.resolve(_this._parseResponse(this.response));
           } else if (this.readyState == 4) {
-            deferred.reject(this._parseResponse(this.response));
+            deferred.reject(_this._parseResponse(this.response));
           }
         };
 
