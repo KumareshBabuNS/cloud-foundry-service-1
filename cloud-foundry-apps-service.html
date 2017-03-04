@@ -1,0 +1,291 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<script src="../q/q.js"></script>
+<script src="../lodash/lodash.min.js"></script>
+
+<!--
+# Cloud Foundry Service - Apps
+`cloud-foundry-apps-service`
+
+The Cloud Foundry Service is a Polymer based service to interact with the Cloud Foundry API
+
+## Typical usage
+```
+<cloud-foundry-apps-service
+  id="appsService"
+  api-endpoint="https://api.system.aws-usw02-pr.ice.predix.io"
+  token="eyJhbGciOiJSUzI1NiIsImtpZCI6ImxlZ2FjeS10b2tlbi1rZXkiLCJ0eXAiOiJKV1QifQ">
+</cloud-foundry-apps-service>
+<script>
+  document.querySelector('#appsService').getApps().then(function (apps) {
+    console.log(apps);
+  });
+</script>
+```
+
+@demo demo/cloud-foundry-apps-service-demo.html 
+-->
+
+<dom-module id="cloud-foundry-apps-service">
+  <template>
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'cloud-foundry-apps-service',
+
+      properties: {
+        /**
+         * API root domain for a given CF instance
+         * */
+        apiEndpoint: {
+          type: String,
+          value: ''
+        },
+
+        /** 
+         * User token used for authorization in the API
+         * 
+         * **Note: you can help secure your application
+         * by injecting tokens with a proxy web server**
+         * */
+        token: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * Computed root url (apiEndpoint + /v2)
+         * */
+        _rootUrl: {
+          type: String,
+          computed: '_computeUrl(apiEndpoint)'
+        }
+      },
+
+      _computeUrl: function (apiEndpoint) {
+        return apiEndpoint + '/v2/apps';
+      },
+
+      _sendRequest: function (options) {
+        // Generate deferred promise
+        var deferred = Q.defer();
+
+        // Create HTTP object
+        var xmlhttp;
+        if (window.XMLHttpRequest) {
+          xmlhttp = new XMLHttpRequest();
+        } else {
+          // code for older browsers
+          xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+        }
+
+        // Handle state change and response
+        xmlhttp.onreadystatechange = function() {
+          console.log(this.response);
+          if (this.readyState == 4 && this.status.toString().indexOf(2) === 0) {
+            deferred.resolve(this.response);
+          } else if (this.readyState == 4) {
+            deferred.reject(this.response);
+          }
+        };
+
+        // Open request with selected method
+        xmlhttp.open(options.method ? options.method : 'GET', options.url, true);
+
+        _.forOwn(options.headers, function (value, key) {
+          xmlhttp.setRequestHeader(key, value);
+        });
+
+        // If token specified
+        if (this.token) {
+          xmlhttp.setRequestHeader('Authorization', this.token);
+        }
+
+        // Send body if body exists
+        xmlhttp.send(options.body ? JSON.stringify(options.body) : null);
+
+        return deferred.promise;
+      },
+
+      /**
+       * List all apps to which a user has access
+       * @return {Promise}
+       * */
+      getApps: function getApps () {
+        return this.sendRequest({
+          url: this._rootUrl
+        });
+      },
+
+      /**
+       * Get an app by GUID
+       * @param {String} appId - GUID application identifier
+       * @return {Promise}
+       * */
+      getApp: function getApp (appId) {
+        return this.sendRequest({
+          url: this._rootUrl + '/' + appId
+        });
+      },
+
+      /**
+       * Delete an app
+       * @param {String} appId - GUID application identifier
+       * @return {Promise}
+       * */
+      deleteApp: function deleteApp (appId) {
+        return this.sendRequest({
+          method: 'DELETE',
+          url: this._rootUrl + '/' + appId
+        });
+      },
+
+      /**
+       * Associate an app with a route
+       * @param {String} appId - GUID application identifier
+       * @param {String} routeId - GUID route identifier
+       * @return {Promise}
+       * */
+      addRoute: function addRoute (appId, routeId) {
+        return this.sendRequest({
+          method: 'PUT',
+          url: this._rootUrl + '/' + appId + '/routes/' + routeId
+        });
+      },
+
+      /**
+       * Get an application's summary
+       * @param {String} appId - GUID application identifier
+       * @return {Promise}
+       * */
+      getSummary: function getSummary (appId) {
+        return this.sendRequest({
+          url: this._rootUrl + '/' + appId + '/summary'
+        });
+      },
+
+      /**
+       * Get a start application's stats
+       * @param {String} appId - GUID application identifier
+       * @return {Promise}
+       * */
+      getStats: function getStats (appId) {
+        return this.sendRequest({
+          url: this._rootUrl + '/' + appId + '/stats'
+        });
+      },
+
+      /**
+       * Get an application's environment variables
+       * @param {String} appId - GUID application identifier
+       * @return {Promise}
+       * */
+      getEnvironmentVariables: function getEnvironmentVariables (appId) {
+        return this.sendRequest({
+          url: this._rootUrl + '/' + appId + '/env'
+        });
+      },
+
+      /**
+       * Get an application's instances
+       * @param {String} appId - GUID application identifier
+       * @return {Promise}
+       * */
+      getInstances: function getInstances (appId) {
+        return this.sendRequest({
+          url: this._rootUrl + '/' + appId + '/instances'
+        });
+      },
+
+      /**
+       * Get an application's associated routes
+       * @param {String} appId - GUID application identifier
+       * @return {Promise}
+       * */
+      getRoutes: function getRoutes (appId) {
+        return this.sendRequest({
+          url: this._rootUrl + '/' + appId + '/routes'
+        });
+      },
+
+      /**
+       * Get an application's service instance bindings
+       * @param {String} appId - GUID application identifier
+       * @return {Promise}
+       * */
+      getServiceBindings: function getServiceBindings (appId) {
+        return this.sendRequest({
+          url: this._rootUrl + '/' + appId + '/service_bindings'
+        });
+      },
+
+      /**
+       * Remove the association of an app with a route
+       * @param {String} appId - GUID application identifier
+       * @param {String} routeId - GUID route identifier
+       * @return {Promise}
+       * */
+      deleteRoute: function deleteRoute (appId, routeId) {
+        return this.sendRequest({
+          method: 'DELETE',
+          url: this._rootUrl + '/' + appId + '/routes/' + routeId
+        });
+      },
+
+      /**
+       * Remove the association of an app with a route
+       * @param {String} appId - GUID application identifier
+       * @param {String} serviceInstanceId - GUID service instance identifier
+       * @return {Promise}
+       * */
+      deleteServiceBinding: function deleteServiceBinding (appId, serviceInstanceId) {
+        return this.sendRequest({
+          method: 'DELETE',
+          url: this._rootUrl + '/' + appId + '/service_bindings/' + serviceInstanceId
+        });
+      },
+
+      /**
+       * Remove the association of an app with a route
+       * @param {String} appId - GUID application identifier
+       * @return {Promise}
+       * */
+      restage: function restage (appId) {
+        return this.sendRequest({
+          method: 'POST',
+          url: this._rootUrl + '/' + appId + '/restage'
+        });
+      },
+
+      /**
+       * Delete an application instance
+       * @param {String} appId - GUID application identifier
+       * @param {Integer} instanceIndex - instance index
+       * @return {Promise}
+       * */
+      deleteInstance: function deleteInstance (appId, instanceIndex) {
+        return this.sendRequest({
+          method: 'DELETE',
+          url: this._rootUrl + '/' + appId + '/instances/' + instanceIndex
+        });
+      },
+
+      /**
+       * Update an application
+       * @param {String} appId - GUID application identifier
+       * @param {Object} app - application
+       * @return {Promise}
+       * */
+      update: function update (appId, app) {
+        return this.sendRequest({
+          method: 'PUT',
+          url: this._rootUrl + '/' + appId + '/restage',
+          body: app
+        });
+      }
+
+    });
+  </script>
+</dom-module>
