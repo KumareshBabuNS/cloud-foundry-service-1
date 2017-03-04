@@ -270,6 +270,36 @@ The Cloud Foundry Service is a Polymer based service to interact with the Cloud 
       },
 
       /**
+       * Start a stopped application
+       * @param {String} appId - GUID application identifier
+       * @return {Promise}
+       * */
+      start: function start (appId) {
+        return this._sendRequest({
+          method: 'PUT',
+          url: this._rootUrl + '/' + appId + '?async=true',
+          body: {
+            state: 'STARTED'
+          }
+        });
+      },
+
+      /**
+       * Stop a started application
+       * @param {String} appId - GUID application identifier
+       * @return {Promise}
+       * */
+      stop: function stop (appId) {
+        return this._sendRequest({
+          method: 'PUT',
+          url: this._rootUrl + '/' + appId + '?async=true',
+          body: {
+            state: 'STOPPED'
+          }
+        });
+      },
+
+      /**
        * Delete an application instance
        * @param {String} appId - GUID application identifier
        * @param {Integer} instanceIndex - instance index
