@@ -114,7 +114,7 @@ The Cloud Foundry Service is a Polymer based service to interact with the Cloud 
        * @return {Promise}
        * */
       getApps: function getApps () {
-        return this.sendRequest({
+        return this._sendRequest({
           url: this._rootUrl
         });
       },
@@ -125,7 +125,7 @@ The Cloud Foundry Service is a Polymer based service to interact with the Cloud 
        * @return {Promise}
        * */
       getApp: function getApp (appId) {
-        return this.sendRequest({
+        return this._sendRequest({
           url: this._rootUrl + '/' + appId
         });
       },
@@ -136,7 +136,7 @@ The Cloud Foundry Service is a Polymer based service to interact with the Cloud 
        * @return {Promise}
        * */
       deleteApp: function deleteApp (appId) {
-        return this.sendRequest({
+        return this._sendRequest({
           method: 'DELETE',
           url: this._rootUrl + '/' + appId
         });
@@ -149,7 +149,7 @@ The Cloud Foundry Service is a Polymer based service to interact with the Cloud 
        * @return {Promise}
        * */
       addRoute: function addRoute (appId, routeId) {
-        return this.sendRequest({
+        return this._sendRequest({
           method: 'PUT',
           url: this._rootUrl + '/' + appId + '/routes/' + routeId
         });
@@ -161,7 +161,7 @@ The Cloud Foundry Service is a Polymer based service to interact with the Cloud 
        * @return {Promise}
        * */
       getSummary: function getSummary (appId) {
-        return this.sendRequest({
+        return this._sendRequest({
           url: this._rootUrl + '/' + appId + '/summary'
         });
       },
@@ -172,7 +172,7 @@ The Cloud Foundry Service is a Polymer based service to interact with the Cloud 
        * @return {Promise}
        * */
       getStats: function getStats (appId) {
-        return this.sendRequest({
+        return this._sendRequest({
           url: this._rootUrl + '/' + appId + '/stats'
         });
       },
@@ -183,7 +183,7 @@ The Cloud Foundry Service is a Polymer based service to interact with the Cloud 
        * @return {Promise}
        * */
       getEnvironmentVariables: function getEnvironmentVariables (appId) {
-        return this.sendRequest({
+        return this._sendRequest({
           url: this._rootUrl + '/' + appId + '/env'
         });
       },
@@ -194,7 +194,7 @@ The Cloud Foundry Service is a Polymer based service to interact with the Cloud 
        * @return {Promise}
        * */
       getInstances: function getInstances (appId) {
-        return this.sendRequest({
+        return this._sendRequest({
           url: this._rootUrl + '/' + appId + '/instances'
         });
       },
@@ -205,7 +205,7 @@ The Cloud Foundry Service is a Polymer based service to interact with the Cloud 
        * @return {Promise}
        * */
       getRoutes: function getRoutes (appId) {
-        return this.sendRequest({
+        return this._sendRequest({
           url: this._rootUrl + '/' + appId + '/routes'
         });
       },
@@ -216,7 +216,7 @@ The Cloud Foundry Service is a Polymer based service to interact with the Cloud 
        * @return {Promise}
        * */
       getServiceBindings: function getServiceBindings (appId) {
-        return this.sendRequest({
+        return this._sendRequest({
           url: this._rootUrl + '/' + appId + '/service_bindings'
         });
       },
@@ -228,7 +228,7 @@ The Cloud Foundry Service is a Polymer based service to interact with the Cloud 
        * @return {Promise}
        * */
       deleteRoute: function deleteRoute (appId, routeId) {
-        return this.sendRequest({
+        return this._sendRequest({
           method: 'DELETE',
           url: this._rootUrl + '/' + appId + '/routes/' + routeId
         });
@@ -241,7 +241,7 @@ The Cloud Foundry Service is a Polymer based service to interact with the Cloud 
        * @return {Promise}
        * */
       deleteServiceBinding: function deleteServiceBinding (appId, serviceInstanceId) {
-        return this.sendRequest({
+        return this._sendRequest({
           method: 'DELETE',
           url: this._rootUrl + '/' + appId + '/service_bindings/' + serviceInstanceId
         });
@@ -253,7 +253,7 @@ The Cloud Foundry Service is a Polymer based service to interact with the Cloud 
        * @return {Promise}
        * */
       restage: function restage (appId) {
-        return this.sendRequest({
+        return this._sendRequest({
           method: 'POST',
           url: this._rootUrl + '/' + appId + '/restage'
         });
@@ -266,7 +266,7 @@ The Cloud Foundry Service is a Polymer based service to interact with the Cloud 
        * @return {Promise}
        * */
       deleteInstance: function deleteInstance (appId, instanceIndex) {
-        return this.sendRequest({
+        return this._sendRequest({
           method: 'DELETE',
           url: this._rootUrl + '/' + appId + '/instances/' + instanceIndex
         });
@@ -279,7 +279,7 @@ The Cloud Foundry Service is a Polymer based service to interact with the Cloud 
        * @return {Promise}
        * */
       update: function update (appId, app) {
-        return this.sendRequest({
+        return this._sendRequest({
           method: 'PUT',
           url: this._rootUrl + '/' + appId + '/restage',
           body: app
