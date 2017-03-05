@@ -321,7 +321,7 @@ The Cloud Foundry Service is a Polymer based service to interact with the Cloud 
       update: function update (appId, app) {
         return this._sendRequest({
           method: 'PUT',
-          url: this._rootUrl + '/' + appId + '/restage',
+          url: this._rootUrl + '/' + appId,
           body: app
         });
       }
