@@ -1,6 +1,6 @@
 {
   "name": "cloud-foundry-service",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Polymer based service to interact with the Cloud Foundry API",
   "main": "cloud-foundry-service.html",
   "dependencies": {
