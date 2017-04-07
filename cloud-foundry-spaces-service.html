@@ -1,0 +1,428 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<script src="../q/q.js"></script>
+<script src="../lodash/dist/lodash.min.js"></script>
+
+<!--
+# Cloud Foundry Service - spaces
+`cloud-foundry-spaces-service`
+
+The Cloud Foundry Service is a Polymer based service to interact with the Cloud Foundry API
+
+## Typical usage
+```
+<cloud-foundry-spaces-service
+  id="spacesService"
+  api-endpoint="https://api.system.aws-usw02-pr.ice.predix.io"
+  token="eyJhbGciOiJSUzI1NiIsImtpZCI6ImxlZ2FjeS10b2tlbi1rZXkiLCJ0eXAiOiJKV1QifQ">
+</cloud-foundry-spaces-service>
+<script>
+  document.querySelector('#spacesService').getSpaces().then(function (spaces) {
+    console.log(spaces);
+  });
+</script>
+```
+
+@demo demo/cloud-foundry-spaces-service-demo.html 
+-->
+
+<dom-module id="cloud-foundry-spaces-service">
+  <template>
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'cloud-foundry-spaces-service',
+
+      properties: {
+        /**
+         * API root domain for a given CF instance
+         * */
+        apiEndpoint: {
+          type: String,
+          value: ''
+        },
+
+        /** 
+         * User token used for authorization in the API
+         * 
+         * **Note: you can help secure your organization
+         * by injecting tokens with a proxy web server**
+         * */
+        token: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * Computed root url (apiEndpoint + /v2)
+         * */
+        _rootUrl: {
+          type: String,
+          computed: '_computeUrl(apiEndpoint)'
+        }
+      },
+
+      _computeUrl: function (apiEndpoint) {
+        return apiEndpoint + '/v2/spaces';
+      },
+
+      _parseResponse: function (response) {
+        var parsedResponse;
+        try {
+          parsedResponse = JSON.parse(response);
+        } catch (e) {
+          parsedResponse = response;
+        }
+        return parsedResponse;
+      },
+
+      _sendRequest: function (options) {
+        var _this = this;
+        // Generate deferred promise
+        var deferred = Q.defer();
+
+        // Create HTTP object
+        var xmlhttp;
+        if (window.XMLHttpRequest) {
+          xmlhttp = new XMLHttpRequest();
+        } else {
+          // code for older browsers
+          xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+        }
+
+        // Handle state change and response
+        xmlhttp.onreadystatechange = function() {
+          if (this.readyState == 4 && this.status.toString().indexOf(2) === 0) {
+            deferred.resolve(_this._parseResponse(this.response));
+          } else if (this.readyState == 4) {
+            deferred.reject(_this._parseResponse(this.response));
+          }
+        };
+
+        // Open request with selected method
+        xmlhttp.open(options.method ? options.method : 'GET', options.url, true);
+
+        _.forOwn(options.headers, function (value, key) {
+          xmlhttp.setRequestHeader(key, value);
+        });
+
+        // If token specified
+        if (this.token) {
+          xmlhttp.setRequestHeader('Authorization', this.token);
+        }
+
+        // Send body if body exists
+        xmlhttp.send(options.body ? JSON.stringify(options.body) : null);
+
+        return deferred.promise;
+      },
+
+      /**
+       * List all spaces to which a user has access
+       * @return {Promise}
+       * */
+      getSpaces: function getSpaces () {
+        return this._sendRequest({
+          url: this._rootUrl
+        });
+      },
+
+      /**
+       * Get a space by GUID
+       * @param {String} spaceId - GUID space identifier
+       * @return {Promise}
+       * */
+      getSpace: function getSpace (spaceId) {
+        return this._sendRequest({
+          url: this._rootUrl + '/' + spaceId
+        });
+      },
+
+      /**
+       * Get a space by GUID
+       * @param {String} spaceId - GUID space identifier
+       * @param {Object} space - space object with data to update
+       * @return {Promise}
+       * */
+      updateSpace: function updateSpace (spaceId, space) {
+        return this._sendRequest({
+          url: this._rootUrl + '/' + spaceId,
+          method: 'PUT',
+          body: space
+        });
+      },
+
+      /**
+       * Add auditor to a space
+       * @param {String} spaceId - GUID space identifier
+       * @param {String} userId - GUID user identifier
+       * @return {Promise}
+       * */
+      addAuditor: function addAuditor (spaceId, userId) {
+        return this._sendRequest({
+          url: this._rootUrl + '/' + spaceId + '/auditors/' + userId,
+          method: 'PUT'
+        });
+      },
+
+      /**
+       * Add a developer user to a space
+       * @param {String} spaceId - GUID space identifier
+       * @param {String} userId - GUID user identifier
+       * @return {Promise}
+       * */
+      addDeveloper: function addDeveloper (spaceId, userId) {
+        return this._sendRequest({
+          url: this._rootUrl + '/' + spaceId + '/developers/' + userId,
+          method: 'PUT'
+        });
+      },
+
+      /**
+       * Add a manager user to a space
+       * @param {String} spaceId - GUID space identifier
+       * @param {String} userId - GUID user identifier
+       * @return {Promise}
+       * */
+      addManager: function addManager (spaceId, userId) {
+        return this._sendRequest({
+          url: this._rootUrl + '/' + spaceId + '/managers/' + userId,
+          method: 'PUT'
+        });
+      },
+
+      /**
+       * Add a security group to a space
+       * @param {String} spaceId - GUID space identifier
+       * @param {String} securityGroupId - GUID security group identifier
+       * @return {Promise}
+       * */
+      addSecurityGroup: function addSecurityGroup (spaceId, userId) {
+        return this._sendRequest({
+          url: this._rootUrl + '/' + spaceId + '/security_groups/' + securityGroupId,
+          method: 'PUT'
+        });
+      },
+
+      /**
+       * Add a space
+       * @param {Object} space - space object
+       * @return {Promise}
+       * */
+      addSpace: function addSpace (space) {
+        return this._sendRequest({
+          url: this._rootUrl,
+          method: 'POST',
+          body: space
+        });
+      },
+
+      /**
+       * Delete a space
+       * @param {String} spaceId - GUID space identifier
+       * @return {Promise}
+       * */
+      deleteSpace: function deleteSpace (spaceId) {
+        return this._sendRequest({
+          url: this._rootUrl + '/' + spaceId,
+          method: 'DELETE'
+        });
+      },
+
+      /**
+       * Get a space's summary
+       * @param {String} spaceId - GUID space identifier
+       * @return {Promise}
+       * */
+      getSpaceSummary: function getSpaceSummary (spaceId) {
+        return this._sendRequest({
+          url: this._rootUrl + '/' + spaceId + '/summary'
+        });
+      },
+
+      /**
+       * Get apps for a space
+       * @param {String} spaceId - GUID space identifier
+       * @return {Promise}
+       * */
+      getApps: function getApps (spaceId) {
+        return this._sendRequest({
+          url: this._rootUrl + '/' + spaceId + '/apps'
+        });
+      },
+
+      /**
+       * Get auditors for a space
+       * @param {String} spaceId - GUID space identifier
+       * @return {Promise}
+       * */
+      getAuditors: function getAuditors (spaceId) {
+        return this._sendRequest({
+          url: this._rootUrl + '/' + spaceId + '/auditors'
+        });
+      },
+
+      /**
+       * Get developers for a space
+       * @param {String} spaceId - GUID space identifier
+       * @return {Promise}
+       * */
+      getDevelopers: function getDevelopers (spaceId) {
+        return this._sendRequest({
+          url: this._rootUrl + '/' + spaceId + '/developers'
+        });
+      },
+
+      /**
+       * Get events for a space
+       * @param {String} spaceId - GUID space identifier
+       * @return {Promise}
+       * */
+      getEvents: function getEvents (spaceId) {
+        return this._sendRequest({
+          url: this._rootUrl + '/' + spaceId + '/events'
+        });
+      },
+
+      /**
+       * Get managers for a space
+       * @param {String} spaceId - GUID space identifier
+       * @return {Promise}
+       * */
+      getManagers: function getManagers (spaceId) {
+        return this._sendRequest({
+          url: this._rootUrl + '/' + spaceId + '/managers'
+        });
+      },
+
+      /**
+       * Get routes for a space
+       * @param {String} spaceId - GUID space identifier
+       * @return {Promise}
+       * */
+      getRoutes: function getRoutes (spaceId) {
+        return this._sendRequest({
+          url: this._rootUrl + '/' + spaceId + '/routes'
+        });
+      },
+
+      /**
+       * Get security groups for a space
+       * @param {String} spaceId - GUID space identifier
+       * @return {Promise}
+       * */
+      getSecurityGroups: function getSecurityGroups (spaceId) {
+        return this._sendRequest({
+          url: this._rootUrl + '/' + spaceId + '/security_groups'
+        });
+      },
+
+      /**
+       * Get service instances for a space
+       * @param {String} spaceId - GUID space identifier
+       * @return {Promise}
+       * */
+      getServiceInstances: function getServiceInstances (spaceId) {
+        return this._sendRequest({
+          url: this._rootUrl + '/' + spaceId + '/service_instances'
+        });
+      },
+
+      /**
+       * Get services for a space
+       * @param {String} spaceId - GUID space identifier
+       * @return {Promise}
+       * */
+      getServices: function getServices (spaceId) {
+        return this._sendRequest({
+          url: this._rootUrl + '/' + spaceId + '/services'
+        });
+      },
+
+      /**
+       * Get services for a space
+       * @param {String} spaceId - GUID space identifier
+       * @return {Promise}
+       * */
+      getServices: function getServices (spaceId) {
+        return this._sendRequest({
+          url: this._rootUrl + '/' + spaceId + '/services'
+        });
+      },
+
+      /**
+       * Delete a space auditor
+       * @param {String} spaceId - GUID space identifier
+       * @param {String} userId - GUID user identifier
+       * @return {Promise}
+       * */
+      deleteAuditor: function deleteAuditor (spaceId, userId) {
+        return this._sendRequest({
+          url: this._rootUrl + '/' + spaceId + '/auditors/' + userId,
+          method: 'DELETE'
+        });
+      },
+
+      /**
+       * Delete a space developer
+       * @param {String} spaceId - GUID space identifier
+       * @param {String} userId - GUID user identifier
+       * @return {Promise}
+       * */
+      deleteDeveloper: function deleteDeveloper (spaceId, userId) {
+        return this._sendRequest({
+          url: this._rootUrl + '/' + spaceId + '/developers/' + userId,
+          method: 'DELETE'
+        });
+      },
+
+      /**
+       * Delete a space manager
+       * @param {String} spaceId - GUID space identifier
+       * @param {String} userId - GUID user identifier
+       * @return {Promise}
+       * */
+      deleteManager: function deleteManager (spaceId, userId) {
+        return this._sendRequest({
+          url: this._rootUrl + '/' + spaceId + '/managers/' + userId,
+          method: 'DELETE'
+        });
+      },
+
+      /**
+       * Delete a space security group
+       * @param {String} spaceId - GUID space identifier
+       * @param {String} securityGroupId - GUID security group identifier
+       * @return {Promise}
+       * */
+      deleteSecurityGroup: function deleteSecurityGroup (spaceId, securityGroupId) {
+        return this._sendRequest({
+          url: this._rootUrl + '/' + spaceId + '/security_groups/' + securityGroupId,
+          method: 'DELETE'
+        });
+      },
+
+      /**
+       * Get user roles for a space
+       * @param {String} spaceId - GUID space identifier
+       * @param {Number} [resultsPerPage = 100] - Results per page
+       * @param {Number} [page = 1] - Current page
+       * @return {Promise}
+       * */
+      getUserRoles: function getUserRoles (spaceId, resultsPerPage, page) {
+        if (!resultsPerPage) {
+          resultsPerPage = 100;
+        }
+        if (!page) {
+          page = 1;
+        }
+        return this._sendRequest({
+          url: this._rootUrl + '/' + spaceId + '/user_roles?results-per-page=' + resultsPerPage + '&page=' + page
+        });
+      }
+
+    });
+  </script>
+</dom-module>
