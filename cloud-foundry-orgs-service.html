@@ -119,13 +119,19 @@ The Cloud Foundry Service is a Polymer based service to interact with the Cloud 
         return deferred.promise;
       },
 
+      _cleanQuery: function _cleanQuery (query) {
+        query = query || '';
+        return query.replace('/v2/organizations', '');
+      },
+
       /**
        * List all orgs to which a user has access
+       * @param {String} [query]
        * @return {Promise}
        * */
-      getOrgs: function getOrgs () {
+      getOrgs: function getOrgs (query) {
         return this._sendRequest({
-          url: this._rootUrl
+          url: this._rootUrl + this._cleanQuery(query)
         });
       },
 
@@ -167,99 +173,108 @@ The Cloud Foundry Service is a Polymer based service to interact with the Cloud 
       /**
        * List auditors for an organization
        * @param {String} orgId - GUID organization identifier
+       * @param {String} [query]
        * @return {Promise}
        * */
-      getAuditors: function getAuditors (orgId) {
+      getAuditors: function getAuditors (orgId, query) {
         return this._sendRequest({
-          url: this._rootUrl + '/' + orgId + '/auditors'
+          url: this._rootUrl + '/' + orgId + '/auditors' + this._cleanQuery(query)
         });
       },
 
       /**
        * List billing managers for an organization
        * @param {String} orgId - GUID organization identifier
+       * @param {String} [query]
        * @return {Promise}
        * */
-      getBillingManagers: function getBillingManagers (orgId) {
+      getBillingManagers: function getBillingManagers (orgId, query) {
         return this._sendRequest({
-          url: this._rootUrl + '/' + orgId + '/billing_managers'
+          url: this._rootUrl + '/' + orgId + '/billing_managers' + this._cleanQuery(query)
         });
       },
 
       /**
        * List domains for an organization
        * @param {String} orgId - GUID organization identifier
+       * @param {String} [query]
        * @return {Promise}
        * */
-      getDomains: function getDomains (orgId) {
+      getDomains: function getDomains (orgId, query) {
         return this._sendRequest({
-          url: this._rootUrl + '/' + orgId + '/domains'
+          url: this._rootUrl + '/' + orgId + '/domains' + this._cleanQuery(query)
         });
       },
 
       /**
        * List managers for an organization
        * @param {String} orgId - GUID organization identifier
+       * @param {String} [query]
        * @return {Promise}
        * */
       getManagers: function getManagers (orgId) {
         return this._sendRequest({
-          url: this._rootUrl + '/' + orgId + '/managers'
+          url: this._rootUrl + '/' + orgId + '/managers' + this._cleanQuery(query)
         });
       },
 
       /**
        * List private domains for an organization
        * @param {String} orgId - GUID organization identifier
+       * @param {String} [query]
        * @return {Promise}
        * */
-      getPrivateDomains: function getPrivateDomains (orgId) {
+      getPrivateDomains: function getPrivateDomains (orgId, query) {
         return this._sendRequest({
-          url: this._rootUrl + '/' + orgId + '/private_domains'
+          url: this._rootUrl + '/' + orgId + '/private_domains' + this._cleanQuery(query)
         });
       },
 
       /**
        * List services for an organization
        * @param {String} orgId - GUID organization identifier
+       * @param {String} [query]
        * @return {Promise}
        * */
-      getServices: function getServices (orgId) {
+      getServices: function getServices (orgId, query) {
         return this._sendRequest({
-          url: this._rootUrl + '/' + orgId + '/services'
+          url: this._rootUrl + '/' + orgId + '/services' + this._cleanQuery(query)
         });
       },
 
       /**
        * List space quota definitions for an organization
        * @param {String} orgId - GUID organization identifier
+       * @param {String} [query]
        * @return {Promise}
        * */
-      getSpaceQuotaDefinitions: function getSpaceQuotaDefinitions (orgId) {
+      getSpaceQuotaDefinitions: function getSpaceQuotaDefinitions (orgId, query) {
         return this._sendRequest({
-          url: this._rootUrl + '/' + orgId + '/space_quota_definitions'
+          url: this._rootUrl + '/' + orgId + '/space_quota_definitions' + this._cleanQuery(query)
         });
       },
 
       /**
        * List spaces for an organization
        * @param {String} orgId - GUID organization identifier
+       * @param {String} [query]
        * @return {Promise}
        * */
-      getSpaces: function getSpaces (orgId) {
+      getSpaces: function getSpaces (orgId, query) {
         return this._sendRequest({
-          url: this._rootUrl + '/' + orgId + '/spaces'
+          url: this._rootUrl + '/' + orgId + '/spaces' + this._cleanQuery(query)
         });
       },
 
       /**
        * List users for an organization
        * @param {String} orgId - GUID organization identifier
+       * @param {String} [query]
        * @return {Promise}
        * */
-      getUsers: function getUsers (orgId) {
+      getUsers: function getUsers (orgId, query) {
         return this._sendRequest({
-          url: this._rootUrl + '/' + orgId + '/users'
+          url: this._rootUrl + '/' + orgId + '/users' + this._cleanQuery(query)
         });
       },
 

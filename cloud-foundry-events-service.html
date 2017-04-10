@@ -120,12 +120,13 @@ The Cloud Foundry Service is a Polymer based service to interact with the Cloud 
       },
 
       _cleanQuery: function _cleanQuery (query) {
+        query = query || '';
         return query.replace('/v2/events', '');
       },
 
       /**
        * List all events
-       * @param {String} query
+       * @param {String} [query]
        * @return {Promise}
        * */
       getEvents: function getEvents (query) {

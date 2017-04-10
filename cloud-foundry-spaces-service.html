@@ -119,13 +119,19 @@ The Cloud Foundry Service is a Polymer based service to interact with the Cloud 
         return deferred.promise;
       },
 
+      _cleanQuery: function _cleanQuery (query) {
+        query = query || '';
+        return query.replace('/v2/organizations', '');
+      },
+
       /**
        * List all spaces to which a user has access
+       * @param {String} [query]
        * @return {Promise}
        * */
-      getSpaces: function getSpaces () {
+      getSpaces: function getSpaces (query) {
         return this._sendRequest({
-          url: this._rootUrl
+          url: this._rootUrl + this._cleanQuery(query)
         });
       },
 
@@ -245,77 +251,84 @@ The Cloud Foundry Service is a Polymer based service to interact with the Cloud 
       /**
        * Get apps for a space
        * @param {String} spaceId - GUID space identifier
+       * @param {String} [query]
        * @return {Promise}
        * */
-      getApps: function getApps (spaceId) {
+      getApps: function getApps (spaceId, query) {
         return this._sendRequest({
-          url: this._rootUrl + '/' + spaceId + '/apps'
+          url: this._rootUrl + '/' + spaceId + '/apps' + this._cleanQuery(query)
         });
       },
 
       /**
        * Get auditors for a space
        * @param {String} spaceId - GUID space identifier
+       * @param {String} [query]
        * @return {Promise}
        * */
-      getAuditors: function getAuditors (spaceId) {
+      getAuditors: function getAuditors (spaceId, query) {
         return this._sendRequest({
-          url: this._rootUrl + '/' + spaceId + '/auditors'
+          url: this._rootUrl + '/' + spaceId + '/auditors' + this._cleanQuery(query)
         });
       },
 
       /**
        * Get developers for a space
        * @param {String} spaceId - GUID space identifier
+       * @param {String} [query]
        * @return {Promise}
        * */
-      getDevelopers: function getDevelopers (spaceId) {
+      getDevelopers: function getDevelopers (spaceId, query) {
         return this._sendRequest({
-          url: this._rootUrl + '/' + spaceId + '/developers'
+          url: this._rootUrl + '/' + spaceId + '/developers' + this._cleanQuery(query)
         });
       },
 
       /**
        * Get events for a space
        * @param {String} spaceId - GUID space identifier
+       * @param {String} [query]
        * @return {Promise}
        * */
-      getEvents: function getEvents (spaceId) {
+      getEvents: function getEvents (spaceId, query) {
         return this._sendRequest({
-          url: this._rootUrl + '/' + spaceId + '/events'
+          url: this._rootUrl + '/' + spaceId + '/events' + this._cleanQuery(query)
         });
       },
 
       /**
        * Get managers for a space
        * @param {String} spaceId - GUID space identifier
+       * @param {String} [query]
        * @return {Promise}
        * */
-      getManagers: function getManagers (spaceId) {
+      getManagers: function getManagers (spaceId, query) {
         return this._sendRequest({
-          url: this._rootUrl + '/' + spaceId + '/managers'
+          url: this._rootUrl + '/' + spaceId + '/managers' + this._cleanQuery(query)
         });
       },
 
       /**
        * Get routes for a space
        * @param {String} spaceId - GUID space identifier
+       * @param {String} [query]
        * @return {Promise}
        * */
-      getRoutes: function getRoutes (spaceId) {
+      getRoutes: function getRoutes (spaceId, query) {
         return this._sendRequest({
-          url: this._rootUrl + '/' + spaceId + '/routes'
+          url: this._rootUrl + '/' + spaceId + '/routes' + this._cleanQuery(query)
         });
       },
 
       /**
        * Get security groups for a space
        * @param {String} spaceId - GUID space identifier
+       * @param {String} [query]
        * @return {Promise}
        * */
-      getSecurityGroups: function getSecurityGroups (spaceId) {
+      getSecurityGroups: function getSecurityGroups (spaceId, query) {
         return this._sendRequest({
-          url: this._rootUrl + '/' + spaceId + '/security_groups'
+          url: this._rootUrl + '/' + spaceId + '/security_groups' + this._cleanQuery(query)
         });
       },
 
@@ -333,22 +346,12 @@ The Cloud Foundry Service is a Polymer based service to interact with the Cloud 
       /**
        * Get services for a space
        * @param {String} spaceId - GUID space identifier
+       * @param {String} [query]
        * @return {Promise}
        * */
-      getServices: function getServices (spaceId) {
+      getServices: function getServices (spaceId, query) {
         return this._sendRequest({
-          url: this._rootUrl + '/' + spaceId + '/services'
-        });
-      },
-
-      /**
-       * Get services for a space
-       * @param {String} spaceId - GUID space identifier
-       * @return {Promise}
-       * */
-      getServices: function getServices (spaceId) {
-        return this._sendRequest({
-          url: this._rootUrl + '/' + spaceId + '/services'
+          url: this._rootUrl + '/' + spaceId + '/services' + this._cleanQuery(query)
         });
       },
 
