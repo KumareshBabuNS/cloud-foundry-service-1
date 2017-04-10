@@ -1,0 +1,140 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<script src="../q/q.js"></script>
+<script src="../lodash/dist/lodash.min.js"></script>
+
+<!--
+# Cloud Foundry Service - Events
+`cloud-foundry-events-service`
+
+The Cloud Foundry Service is a Polymer based service to interact with the Cloud Foundry API
+
+## Typical usage
+```
+<cloud-foundry-events-service
+  id="eventsService"
+  api-endpoint="https://api.system.aws-usw02-pr.ice.predix.io"
+  token="eyJhbGciOiJSUzI1NiIsImtpZCI6ImxlZ2FjeS10b2tlbi1rZXkiLCJ0eXAiOiJKV1QifQ">
+</cloud-foundry-events-service>
+<script>
+  document.querySelector('#eventsService').getEvents(query).then(function (events) {
+    console.log(events);
+  });
+</script>
+```
+
+@demo demo/cloud-foundry-events-service-demo.html 
+-->
+
+<dom-module id="cloud-foundry-events-service">
+  <template>
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'cloud-foundry-events-service',
+
+      properties: {
+        /**
+         * API root domain for a given CF instance
+         * */
+        apiEndpoint: {
+          type: String,
+          value: ''
+        },
+
+        /** 
+         * User token used for authorization in the API
+         * 
+         * **Note: you can help secure your application
+         * by injecting tokens with a proxy web server**
+         * */
+        token: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * Computed root url (apiEndpoint + /v2)
+         * */
+        _rootUrl: {
+          type: String,
+          computed: '_computeUrl(apiEndpoint)'
+        }
+      },
+
+      _computeUrl: function (apiEndpoint) {
+        return apiEndpoint + '/v2/events';
+      },
+
+      _parseResponse: function (response) {
+        var parsedResponse;
+        try {
+          parsedResponse = JSON.parse(response);
+        } catch (e) {
+          parsedResponse = response;
+        }
+        return parsedResponse;
+      },
+
+      _sendRequest: function (options) {
+        var _this = this;
+        // Generate deferred promise
+        var deferred = Q.defer();
+
+        // Create HTTP object
+        var xmlhttp;
+        if (window.XMLHttpRequest) {
+          xmlhttp = new XMLHttpRequest();
+        } else {
+          // code for older browsers
+          xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+        }
+
+        // Handle state change and response
+        xmlhttp.onreadystatechange = function() {
+          if (this.readyState == 4 && this.status.toString().indexOf(2) === 0) {
+            deferred.resolve(_this._parseResponse(this.response));
+          } else if (this.readyState == 4) {
+            deferred.reject(_this._parseResponse(this.response));
+          }
+        };
+
+        // Open request with selected method
+        xmlhttp.open(options.method ? options.method : 'GET', options.url, true);
+
+        _.forOwn(options.headers, function (value, key) {
+          xmlhttp.setRequestHeader(key, value);
+        });
+
+        // If token specified
+        if (this.token) {
+          xmlhttp.setRequestHeader('Authorization', this.token);
+        }
+
+        // Send body if body exists
+        xmlhttp.send(options.body ? JSON.stringify(options.body) : null);
+
+        return deferred.promise;
+      },
+
+      _cleanQuery: function _cleanQuery (query) {
+        query = query || '';
+        return query.replace('/v2/events', '');
+      },
+
+      /**
+       * List all events
+       * @param {String} [query]
+       * @return {Promise}
+       * */
+      getEvents: function getEvents (query) {
+        return this._sendRequest({
+          url: this._rootUrl + this._cleanQuery(query)
+        });
+      }
+
+    });
+  </script>
+</dom-module>

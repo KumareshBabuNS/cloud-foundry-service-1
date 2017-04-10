@@ -1,0 +1,27 @@
+{
+  "name": "cloud-foundry-service",
+  "description": "Polymer based service to interact with the Cloud Foundry API",
+  "main": "cloud-foundry-service.html",
+  "dependencies": {
+    "polymer": "Polymer/polymer#^1.4.0",
+    "q": "^1.0.0",
+    "lodash": "^4.17.4"
+  },
+  "devDependencies": {
+    "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
+    "iron-demo-helpers": "PolymerElements/iron-demo-helpers#^1.0.0",
+    "web-component-tester": "^4.0.0",
+    "webcomponentsjs": "webcomponents/webcomponentsjs#^0.7.0"
+  },
+  "homepage": "https://github.com/brianhenzelmann/cloud-foundry-service",
+  "_release": "c8ef5758a3",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "c8ef5758a32329fde3af881f2b86cc73a5916f94"
+  },
+  "_source": "https://github.com/brianhenzelmann/cloud-foundry-service.git",
+  "_target": "master",
+  "_originalSource": "brianhenzelmann/cloud-foundry-service",
+  "_direct": true
+}

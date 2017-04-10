@@ -1,0 +1,402 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<script src="../q/q.js"></script>
+<script src="../lodash/dist/lodash.min.js"></script>
+
+<!--
+# Cloud Foundry Service - orgs
+`cloud-foundry-orgs-service`
+
+The Cloud Foundry Service is a Polymer based service to interact with the Cloud Foundry API
+
+## Typical usage
+```
+<cloud-foundry-orgs-service
+  id="orgsService"
+  api-endpoint="https://api.system.aws-usw02-pr.ice.predix.io"
+  token="eyJhbGciOiJSUzI1NiIsImtpZCI6ImxlZ2FjeS10b2tlbi1rZXkiLCJ0eXAiOiJKV1QifQ">
+</cloud-foundry-orgs-service>
+<script>
+  document.querySelector('#orgsService').getorgs().then(function (orgs) {
+    console.log(orgs);
+  });
+</script>
+```
+
+@demo demo/cloud-foundry-orgs-service-demo.html 
+-->
+
+<dom-module id="cloud-foundry-orgs-service">
+  <template>
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'cloud-foundry-orgs-service',
+
+      properties: {
+        /**
+         * API root domain for a given CF instance
+         * */
+        apiEndpoint: {
+          type: String,
+          value: ''
+        },
+
+        /** 
+         * User token used for authorization in the API
+         * 
+         * **Note: you can help secure your organization
+         * by injecting tokens with a proxy web server**
+         * */
+        token: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * Computed root url (apiEndpoint + /v2)
+         * */
+        _rootUrl: {
+          type: String,
+          computed: '_computeUrl(apiEndpoint)'
+        }
+      },
+
+      _computeUrl: function (apiEndpoint) {
+        return apiEndpoint + '/v2/organizations';
+      },
+
+      _parseResponse: function (response) {
+        var parsedResponse;
+        try {
+          parsedResponse = JSON.parse(response);
+        } catch (e) {
+          parsedResponse = response;
+        }
+        return parsedResponse;
+      },
+
+      _sendRequest: function (options) {
+        var _this = this;
+        // Generate deferred promise
+        var deferred = Q.defer();
+
+        // Create HTTP object
+        var xmlhttp;
+        if (window.XMLHttpRequest) {
+          xmlhttp = new XMLHttpRequest();
+        } else {
+          // code for older browsers
+          xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+        }
+
+        // Handle state change and response
+        xmlhttp.onreadystatechange = function() {
+          if (this.readyState == 4 && this.status.toString().indexOf(2) === 0) {
+            deferred.resolve(_this._parseResponse(this.response));
+          } else if (this.readyState == 4) {
+            deferred.reject(_this._parseResponse(this.response));
+          }
+        };
+
+        // Open request with selected method
+        xmlhttp.open(options.method ? options.method : 'GET', options.url, true);
+
+        _.forOwn(options.headers, function (value, key) {
+          xmlhttp.setRequestHeader(key, value);
+        });
+
+        // If token specified
+        if (this.token) {
+          xmlhttp.setRequestHeader('Authorization', this.token);
+        }
+
+        // Send body if body exists
+        xmlhttp.send(options.body ? JSON.stringify(options.body) : null);
+
+        return deferred.promise;
+      },
+
+      _cleanQuery: function _cleanQuery (query) {
+        query = query || '';
+        return query.replace('/v2/organizations', '');
+      },
+
+      /**
+       * List all orgs to which a user has access
+       * @param {String} [query]
+       * @return {Promise}
+       * */
+      getOrgs: function getOrgs (query) {
+        return this._sendRequest({
+          url: this._rootUrl + this._cleanQuery(query)
+        });
+      },
+
+      /**
+       * Get an org by GUID
+       * @param {String} orgId - GUID organization identifier
+       * @return {Promise}
+       * */
+      getOrg: function getOrg (orgId) {
+        return this._sendRequest({
+          url: this._rootUrl + '/' + orgId
+        });
+      },
+
+      /**
+       * Get an org summary by GUID
+       * @param {String} orgId - GUID organization identifier
+       * @return {Promise}
+       * */
+      getOrgSummary: function getOrgSummary (orgId) {
+        return this._sendRequest({
+          url: this._rootUrl + '/' + orgId + '/summary'
+        });
+      },
+
+      /**
+       * Associate a user with an organization
+       * @param {String} orgId - GUID organization identifier
+       * @param {String} userId - Cloud Foundry user identifier
+       * @return {Promise}
+       * */
+      addUser: function addUser (orgId, userId) {
+        return this._sendRequest({
+          url: this._rootUrl + '/' + orgId + '/users/' + userId,
+          method: 'PUT'
+        });
+      },
+
+      /**
+       * List auditors for an organization
+       * @param {String} orgId - GUID organization identifier
+       * @param {String} [query]
+       * @return {Promise}
+       * */
+      getAuditors: function getAuditors (orgId, query) {
+        return this._sendRequest({
+          url: this._rootUrl + '/' + orgId + '/auditors' + this._cleanQuery(query)
+        });
+      },
+
+      /**
+       * List billing managers for an organization
+       * @param {String} orgId - GUID organization identifier
+       * @param {String} [query]
+       * @return {Promise}
+       * */
+      getBillingManagers: function getBillingManagers (orgId, query) {
+        return this._sendRequest({
+          url: this._rootUrl + '/' + orgId + '/billing_managers' + this._cleanQuery(query)
+        });
+      },
+
+      /**
+       * List domains for an organization
+       * @param {String} orgId - GUID organization identifier
+       * @param {String} [query]
+       * @return {Promise}
+       * */
+      getDomains: function getDomains (orgId, query) {
+        return this._sendRequest({
+          url: this._rootUrl + '/' + orgId + '/domains' + this._cleanQuery(query)
+        });
+      },
+
+      /**
+       * List managers for an organization
+       * @param {String} orgId - GUID organization identifier
+       * @param {String} [query]
+       * @return {Promise}
+       * */
+      getManagers: function getManagers (orgId) {
+        return this._sendRequest({
+          url: this._rootUrl + '/' + orgId + '/managers' + this._cleanQuery(query)
+        });
+      },
+
+      /**
+       * List private domains for an organization
+       * @param {String} orgId - GUID organization identifier
+       * @param {String} [query]
+       * @return {Promise}
+       * */
+      getPrivateDomains: function getPrivateDomains (orgId, query) {
+        return this._sendRequest({
+          url: this._rootUrl + '/' + orgId + '/private_domains' + this._cleanQuery(query)
+        });
+      },
+
+      /**
+       * List services for an organization
+       * @param {String} orgId - GUID organization identifier
+       * @param {String} [query]
+       * @return {Promise}
+       * */
+      getServices: function getServices (orgId, query) {
+        return this._sendRequest({
+          url: this._rootUrl + '/' + orgId + '/services' + this._cleanQuery(query)
+        });
+      },
+
+      /**
+       * List space quota definitions for an organization
+       * @param {String} orgId - GUID organization identifier
+       * @param {String} [query]
+       * @return {Promise}
+       * */
+      getSpaceQuotaDefinitions: function getSpaceQuotaDefinitions (orgId, query) {
+        return this._sendRequest({
+          url: this._rootUrl + '/' + orgId + '/space_quota_definitions' + this._cleanQuery(query)
+        });
+      },
+
+      /**
+       * List spaces for an organization
+       * @param {String} orgId - GUID organization identifier
+       * @param {String} [query]
+       * @return {Promise}
+       * */
+      getSpaces: function getSpaces (orgId, query) {
+        return this._sendRequest({
+          url: this._rootUrl + '/' + orgId + '/spaces' + this._cleanQuery(query)
+        });
+      },
+
+      /**
+       * List users for an organization
+       * @param {String} orgId - GUID organization identifier
+       * @param {String} [query]
+       * @return {Promise}
+       * */
+      getUsers: function getUsers (orgId, query) {
+        return this._sendRequest({
+          url: this._rootUrl + '/' + orgId + '/users' + this._cleanQuery(query)
+        });
+      },
+
+      /**
+       * Delete an auditor from an organization
+       * @param {String} orgId - GUID organization identifier
+       * @param {String} auditorId - GUID auditor identifier
+       * @return {Promise}
+       * */
+      deleteAuditor: function deleteAuditor (orgId, auditorId) {
+        return this._sendRequest({
+          url: this._rootUrl + '/' + orgId + '/auditors/' + auditorId,
+          method: 'DELETE'
+        });
+      },
+
+      /**
+       * Delete a billing manager from an organization
+       * @param {String} orgId - GUID organization identifier
+       * @param {String} billingManagerId - GUID billing manager identifier
+       * @return {Promise}
+       * */
+      deleteBillingManager: function deleteBillingManager (orgId, billingManagerId) {
+        return this._sendRequest({
+          url: this._rootUrl + '/' + orgId + '/billing_managers/' + billingManagerId,
+          method: 'DELETE'
+        });
+      },
+
+      /**
+       * Delete a manager from an organization
+       * @param {String} orgId - GUID organization identifier
+       * @param {String} billingManagerId - GUID manager identifier
+       * @return {Promise}
+       * */
+      deleteManager: function deleteManager (orgId, managerId) {
+        return this._sendRequest({
+          url: this._rootUrl + '/' + orgId + '/managers/' + managerId,
+          method: 'DELETE'
+        });
+      },
+
+      /**
+       * Delete a private domain from an organization
+       * @param {String} orgId - GUID organization identifier
+       * @param {String} privateDomainId - GUID private domain identifier
+       * @return {Promise}
+       * */
+      deletePrivateDomain: function deletePrivateDomain (orgId, privateDomainId) {
+        return this._sendRequest({
+          url: this._rootUrl + '/' + orgId + '/private_domains/' + privateDomainId,
+          method: 'DELETE'
+        });
+      },
+
+      /**
+       * Delete a user from an organization
+       * @param {String} orgId - GUID organization identifier
+       * @param {String} userId - GUID user identifier
+       * @return {Promise}
+       * */
+      deleteUser: function deleteUser (orgId, userId) {
+        return this._sendRequest({
+          url: this._rootUrl + '/' + orgId + '/users/' + userId,
+          method: 'DELETE'
+        });
+      },
+
+      /**
+       * Delete a user from an organization
+       * @param {String} orgId - GUID organization identifier
+       * @param {String} userId - GUID user identifier
+       * @return {Promise}
+       * */
+      deleteUser: function deleteUser (orgId, userId) {
+        return this._sendRequest({
+          url: this._rootUrl + '/' + orgId + '/users/' + userId,
+          method: 'DELETE'
+        });
+      },
+
+      /**
+       * Get instance usage for an organization
+       * @param {String} orgId - GUID organization identifier
+       * @return {Promise}
+       * */
+      getInstanceUsage: function getInstanceUsage (orgId) {
+        return this._sendRequest({
+          url: this._rootUrl + '/' + orgId + '/instance_usage'
+        });
+      },
+
+      /**
+       * Get memory usage for an organization
+       * @param {String} orgId - GUID organization identifier
+       * @return {Promise}
+       * */
+      getMemoryUsage: function getMemoryUsage (orgId) {
+        return this._sendRequest({
+          url: this._rootUrl + '/' + orgId + '/memory_usage'
+        });
+      },
+
+      /**
+       * Get user roles for an organization
+       * @param {String} orgId - GUID organization identifier
+       * @param {Number} [resultsPerPage = 100] - Results per page
+       * @param {Number} [page = 1] - Current page
+       * @return {Promise}
+       * */
+      getUserRoles: function getUserRoles (orgId, resultsPerPage, page) {
+        if (!resultsPerPage) {
+          resultsPerPage = 100;
+        }
+        if (!page) {
+          page = 1;
+        }
+        return this._sendRequest({
+          url: this._rootUrl + '/' + orgId + '/user_roles?results-per-page=' + resultsPerPage + '&page=' + page
+        });
+      }
+
+    });
+  </script>
+</dom-module>
